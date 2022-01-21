@@ -13,17 +13,21 @@ import (
 
 func main() {
 	l := log.New(os.Stdout, "product-api", log.LstdFlags)
+
+	// create handlers
 	ph := handlers.NewProducts(l)
 
+	// create a new mux and register the handler
 	sm := http.NewServeMux()
 	sm.Handle("/", ph)
 
 	s := &http.Server{
-		Addr:         ":9090",
-		Handler:      sm,
-		IdleTimeout:  120 * time.Second,
-		ReadTimeout:  1 * time.Second,
-		WriteTimeout: 1 * time.Second,
+		Addr:         ":9090",           // configure bind address
+		Handler:      sm,                // set default handler
+		ErrorLog:     l,                 // set logger for server
+		IdleTimeout:  120 * time.Second, // max time for connection using TCP Keep-Alive
+		ReadTimeout:  5 * time.Second,   // max time to read request from the client
+		WriteTimeout: 10 * time.Second,  // max time to write response to the client
 	}
 
 	go func() {
@@ -38,7 +42,7 @@ func main() {
 	signal.Notify(sigChan, os.Kill)
 
 	sig := <-sigChan
-	l.Println("Recieved terminate, graceful shutdown", sig)
+	l.Println("Received terminate, graceful shutdown", sig)
 
 	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
 	s.Shutdown(ctx)
