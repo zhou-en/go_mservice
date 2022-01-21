@@ -52,12 +52,12 @@ func UpdateProduct(id int, p *Product) error {
 }
 
 func findProduct(id int) (*Product, int, error) {
-	for _, p := range productList {
+	for pos, p := range productList {
 		if p.ID == id {
-			return p, -1, nil
+			return p, pos, nil
 		}
 	}
-	return nil, id, ErrProductNotFound
+	return nil, -1, ErrProductNotFound
 }
 
 func getNextID() int {
